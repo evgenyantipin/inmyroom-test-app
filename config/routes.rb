@@ -1,4 +1,11 @@
 Rails.application.routes.draw do
   root to: 'welcome#home'
-  # For details on the DSL available within this file, see https://guides.rubyonrails.org/routing.html
+
+  namespace :api, defaults: { format: :json } do
+    namespace :v1 do
+      resources :geocode, only: [:index]
+    end
+  end
+
+  get '*path', to: 'welcome#home', via: :all
 end
