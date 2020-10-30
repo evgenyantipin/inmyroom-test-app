@@ -1,25 +1,17 @@
 import * as React from "react";
 import { useClickAway } from "react-use";
+import { useDispatch } from "react-redux";
 import { getSuggestions } from "../../api/dadata";
 import SuggestionItem from "../../components/SuggestionItem";
-import { LocationContext } from "../../LocationContext";
+import { setLocation } from "../../store/location";
 
-interface IAutocompleteProps {
-  token: string;
-}
-
-const Autocomplete: React.FC<IAutocompleteProps> = (props) => {
-  const contextData = React.useContext<ILocationContext>(LocationContext);
-
+const Autocomplete: React.FC = () => {
+  const dispatch = useDispatch();
   const [query, setQuery] = React.useState<string>("");
   const [showSuggestions, setShowSuggestions] = React.useState<boolean>(true);
   const [suggestions, setSuggestions] = React.useState<ISuggestion[]>([]);
   const [loading, setLoading] = React.useState<boolean>(false);
   const ref = React.useRef<HTMLDivElement>(null);
-
-  React.useEffect(() => {
-    setQuery(contextData.location.city)
-  }, [contextData.location]);
 
   useClickAway(ref, (): void => {
     setShowSuggestions(false);
@@ -29,8 +21,8 @@ const Autocomplete: React.FC<IAutocompleteProps> = (props) => {
     setShowSuggestions(true);
   };
 
-  const fetchSuggestions = async (payload: IPayload): Promise<any> => {
-    return getSuggestions(payload, props.token);
+  const fetchSuggestions = async (value: string): Promise<any> => {
+    return getSuggestions(value);
   };
 
   const onChange = async (
@@ -40,19 +32,8 @@ const Autocomplete: React.FC<IAutocompleteProps> = (props) => {
     setShowSuggestions(true);
     setLoading(true);
 
-    const payload: IPayload = {
-      from_bound: { value: "city" },
-      to_bound: { value: "city" },
-      value: "city",
-      language: "ru",
-      locations: [{ country: "*" }],
-      restrict_value: false,
-      query: e.currentTarget.value,
-      count: 10,
-    };
-
     try {
-      const data = await fetchSuggestions(payload);
+      const data = await fetchSuggestions(e.currentTarget.value);
       if (data && data.suggestions) setSuggestions(data.suggestions);
       setLoading(false);
     } catch (error) {
@@ -67,7 +48,7 @@ const Autocomplete: React.FC<IAutocompleteProps> = (props) => {
       } = prev[index];
 
       setQuery(city);
-      contextData.setLocation({ city, country });
+      dispatch(setLocation({ city, country }));
       setShowSuggestions(false);
       return prev;
     });
@@ -112,4 +93,4 @@ const Autocomplete: React.FC<IAutocompleteProps> = (props) => {
   );
 };
 
-export default Autocomplete;
+export default React.memo(Autocomplete);

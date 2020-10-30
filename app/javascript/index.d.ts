@@ -35,5 +35,17 @@ interface ISuggestion {
 
 interface ILocationContext {
   location: { city: string | null; country: string | null; },
-  setLocation: ({ city, country }) => void;
+  handleSetLocation: ({ city, country }) => void;
+}
+
+interface IState {
+  location: {
+    city: null | string;
+    country: null | string;
+  };
+}
+
+
+declare module 'react-redux' {
+  interface DefaultRootState extends IState {}
 }

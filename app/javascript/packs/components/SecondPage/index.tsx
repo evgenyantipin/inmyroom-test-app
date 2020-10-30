@@ -1,14 +1,15 @@
 import * as React from "react";
-import { LocationContext } from "../../LocationContext";
+import { useSelector } from "react-redux";
+import { IState } from "../../store/location";
 
 const SecondPage: React.FC = () => {
-  const contextData = React.useContext<ILocationContext>(LocationContext);
+  const { location } = useSelector((state: IState) => state.location);
 
   return (
     <div className="page">
       <div>
-        <h4>city: {contextData.location.city}</h4>
-        <h4>counry: {contextData.location.country}</h4>
+        <h4>city: {location.city}</h4>
+        <h4>counry: {location.country}</h4>
       </div>
     </div>
   );

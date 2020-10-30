@@ -1,10 +1,12 @@
 import * as React from "react";
 import * as ReactDOM from "react-dom";
 import { BrowserRouter as Router, Route, Link, Switch } from "react-router-dom";
+import { useDispatch, Provider } from "react-redux";
 import Autocomplete from "./components/Autocomplete";
 import SecondPage from "./components/SecondPage";
 import { getGeodata } from "./api/geocode";
-import { LocationContext } from "./LocationContext";
+import { setLocation } from "./store/location";
+import store from "./store";
 
 interface IGeodataData {
   cache_hit: null;
@@ -27,50 +29,55 @@ interface IGeodata {
 }
 
 const App: React.FC = () => {
-  var [location, setLocation] = React.useState({
-    country: "",
-    city: "",
-  });
+  const dispatch = useDispatch();
 
   React.useEffect(() => {
     getGeodata().then((result: IGeodata) => {
       if (result.geodata.data.city && result.geodata.data.country) {
-        setLocation({
-          country: result.geodata.data.country,
-          city: result.geodata.data.city,
-        });
+        dispatch(
+          setLocation({
+            country: result.geodata.data.country,
+            city: result.geodata.data.city,
+          })
+        );
       }
     });
   }, []);
 
   return (
-    <LocationContext.Provider value={{ location, setLocation }}>
-      <div className="wrapper">
-        <ul className="menu">
-          <li>
-            <Link className="menu__item" to="/">
-              Home
-            </Link>
-          </li>
-          <li>
-            <Link className="menu__item" to="/second-page">
-              Second Page
-            </Link>
-          </li>
-        </ul>
-        <Autocomplete token={process.env.DADATA_TOKEN} />
-        <Switch>
-          <Route exact path="/second-page" component={SecondPage} />
-        </Switch>
-      </div>
-    </LocationContext.Provider>
+    <div className="wrapper">
+      <ul className="menu">
+        <li>
+          <Link className="menu__item" to="/">
+            Home
+          </Link>
+        </li>
+        <li>
+          <Link className="menu__item" to="/second-page">
+            Second Page
+          </Link>
+        </li>
+      </ul>
+      <Autocomplete />
+      <Switch>
+        <Route exact path="/second-page" component={SecondPage} />
+      </Switch>
+    </div>
+  );
+};
+
+const Home = () => {
+  return (
+    <Provider store={store}>
+      <App />
+    </Provider>
   );
 };
 
 document.addEventListener("DOMContentLoaded", () => {
   ReactDOM.render(
     <Router>
-      <Route path="/" component={App} />
+      <Route path="/" component={Home} />
     </Router>,
     document.body.appendChild(document.createElement("div"))
   );

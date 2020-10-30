@@ -1,18 +1,24 @@
 import fetch from "isomorphic-unfetch";
 
-interface IPayload {
-  query: string;
-  count: number;
-}
+export const getSuggestions = (query: string) => {
+  const payload: IPayload = {
+    from_bound: { value: "city" },
+    to_bound: { value: "city" },
+    value: "city",
+    language: "en",
+    locations: [{ country: "*" }],
+    restrict_value: false,
+    query,
+    count: 10,
+  };
 
-export const getSuggestions = (payload: IPayload, token: string) => {
   return fetch("https://dadata.ru/api/v2/suggest/address", {
     method: "POST",
     body: JSON.stringify(payload),
     headers: {
       Accept: "application/json",
       "Content-Type": "application/json",
-      Authorization: `Token ${token}`,
+      Authorization: `Token ${process.env.DADATA_TOKEN}`,
     },
   }).then((r) => r.json());
 };
